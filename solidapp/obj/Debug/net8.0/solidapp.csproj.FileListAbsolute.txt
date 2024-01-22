@@ -1,0 +1,14 @@
+/Users/ishaankulkarni/Desktop/C#/solidapp/bin/Debug/net8.0/solidapp
+/Users/ishaankulkarni/Desktop/C#/solidapp/bin/Debug/net8.0/solidapp.deps.json
+/Users/ishaankulkarni/Desktop/C#/solidapp/bin/Debug/net8.0/solidapp.runtimeconfig.json
+/Users/ishaankulkarni/Desktop/C#/solidapp/bin/Debug/net8.0/solidapp.dll
+/Users/ishaankulkarni/Desktop/C#/solidapp/bin/Debug/net8.0/solidapp.pdb
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.GeneratedMSBuildEditorConfig.editorconfig
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.AssemblyInfoInputs.cache
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.AssemblyInfo.cs
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.csproj.CoreCompileInputs.cache
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.dll
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/refint/solidapp.dll
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.pdb
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.genruntimeconfig.cache
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/ref/solidapp.dll
