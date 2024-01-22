@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("solidapp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f3d8fef94dab291d09f46e76f9481f53d65b47a5")]
 [assembly: System.Reflection.AssemblyProductAttribute("solidapp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("solidapp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

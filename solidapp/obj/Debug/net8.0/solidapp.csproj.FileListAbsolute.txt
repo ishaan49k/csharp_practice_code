@@ -12,3 +12,4 @@
 /Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.pdb
 /Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.genruntimeconfig.cache
 /Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/ref/solidapp.dll
+/Users/ishaankulkarni/Desktop/C#/solidapp/obj/Debug/net8.0/solidapp.sourcelink.json
