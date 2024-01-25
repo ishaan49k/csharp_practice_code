@@ -643,47 +643,6 @@ public class SavingsAccount: BankAccount{
 
 
 
-// ITransactionExecutor interface representing the common operations for executing transactions
-public interface ITransactionExecutor{
-    void ExecuteTransaction(IAccount account, decimal amount);
-}
-
-
-
-
-public class DepositTransactionExecutor : ITransactionExecutor{
-    public void ExecuteTransaction(IAccount account, decimal amount){
-        if (account == null){
-            throw new ArgumentNullException(nameof(account));
-        }
-
-        account.Balance += amount;
-        Console.WriteLine($"Deposited ${amount} into account {account.AccountNumber}. New balance: ${account.Balance}");
-        
-        if(account is RuralAccount){
-
-        }
-    }
-}
-
-
-
-public class WithdrawalTransactionExecutor : ITransactionExecutor{
-    public void ExecuteTransaction(IAccount account, decimal amount){
-        if(account == null){
-            throw new ArgumentNullException(nameof(account));
-        }
-
-        if(account.Balance >= amount){
-            account.Balance -= amount;
-            Console.WriteLine($"Withdrawn ${amount} from account {account.AccountNumber}. New balance: ${account.Balance}");
-        }
-        else{
-            Console.WriteLine($"Insufficient funds in account {account.AccountNumber} to withdraw ${amount}.");
-        }
-    }
-}
-
 
 
 // IReportGenerator interface representing the common operations fr generating reports
@@ -899,3 +858,107 @@ class Program{
 }
 
 }
+
+
+
+
+
+/*
+
+using System;
+
+// Event delegate for handling loan approval
+public delegate void LoanApprovalHandler(object sender, EventArgs e);
+
+// Loan class representing a loan entity
+public class Loan
+{
+    public string ApplicantName { get; set; }
+    public decimal LoanAmount { get; set; }
+    public bool IsApproved { get; private set; }
+
+    public Loan(string applicantName, decimal loanAmount)
+    {
+        ApplicantName = applicantName;
+        LoanAmount = loanAmount;
+        IsApproved = false;
+    }
+
+    // Method to approve the loan
+    public void ApproveLoan()
+    {
+        IsApproved = true;
+        OnLoanApproved(EventArgs.Empty);
+    }
+
+    // Event to notify when the loan is approved
+    public event LoanApprovalHandler LoanApproved;
+
+    // Event handler method for the LoanApproved event
+    protected virtual void OnLoanApproved(EventArgs e)
+    {
+        LoanApproved?.Invoke(this, e);
+    }
+}
+
+// LoanManager class to manage loans
+public class LoanManager
+{
+    // Delegate for handling loan approval requests
+    public delegate void LoanApprovalRequestHandler(object sender, EventArgs e);
+
+    // Event for requesting loan approval
+    public event LoanApprovalRequestHandler LoanApprovalRequested;
+
+    // Method to request loan approval
+    public void RequestLoanApproval(Loan loan)
+    {
+        Console.WriteLine($"Loan application received from {loan.ApplicantName} for {loan.LoanAmount:C}");
+
+        // Raise the LoanApprovalRequested event
+        OnLoanApprovalRequested(EventArgs.Empty);
+    }
+
+    // Event handler method for the LoanApprovalRequested event
+    protected virtual void OnLoanApprovalRequested(EventArgs e)
+    {
+        LoanApprovalRequested?.Invoke(this, e);
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        // Create an instance of LoanManager
+        LoanManager loanManager = new LoanManager();
+
+        // Subscribe to the LoanApprovalRequested event
+        loanManager.LoanApprovalRequested += HandleLoanApprovalRequest;
+
+        // Create a loan application
+        Loan loanApplication = new Loan("John Doe", 5000);
+
+        // Request loan approval
+        loanManager.RequestLoanApproval(loanApplication);
+
+        // Output the result
+        Console.WriteLine($"Loan approval status for {loanApplication.ApplicantName}: {loanApplication.IsApproved}");
+    }
+
+    // Event handler method for LoanApprovalRequested event
+    private static void HandleLoanApprovalRequest(object sender, EventArgs e)
+    {
+        // In a real-world scenario, you would perform some logic to approve the loan here
+        // For simplicity, we will just approve the loan in this example
+        Console.WriteLine("Loan approved!");
+        if (sender is Loan loan)
+        {
+            loan.ApproveLoan();
+        }
+    }
+}
+
+
+
+*/
