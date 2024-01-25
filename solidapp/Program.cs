@@ -1,5 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
+using System.Security.Cryptography;
 
 
 
@@ -161,6 +163,10 @@ public class WithdrawalTransaction: ITransaction{
 public interface IReport{
     void GenerateReport(IAccount account);
 }
+
+
+
+
 
 
 
@@ -362,6 +368,12 @@ To modify the code, add a TransactionExecuter Interface and make the Deposit and
 
 
 
+
+/*
+
+// RURAL ACCOUNT CODE
+
+
 // IAccount interface representing the common operations for bank accounts
 public interface IAccount{
     int AccountNumber { get; set;}
@@ -377,12 +389,13 @@ public class BankAccount : IAccount{
     public string AccountHolder { get; set; }
     public decimal Balance { get; set; }
 
-    public BankAccount(int accountNumber, string accountHolder, decimal balance)
-    {
+
+    public BankAccount(int accountNumber, string accountHolder, decimal balance){
         AccountNumber = accountNumber;
         AccountHolder = accountHolder;
         Balance = balance;
     }
+     
 }
 
 
@@ -400,18 +413,16 @@ public class SavingsAccount: BankAccount{
 
 
 // ITransactionExecutor interface representing the common operations for executing transactions
-public interface ITransactionExecutor
-{
+public interface ITransactionExecutor{
     void ExecuteTransaction(IAccount account, decimal amount);
 }
 
-// DepositTransactionExecutor class implementing the ITransactionExecutor interface
-public class DepositTransactionExecutor : ITransactionExecutor
-{
-    public void ExecuteTransaction(IAccount account, decimal amount)
-    {
-        if (account == null)
-        {
+
+
+// DepositTransactionExecutor class implementing the ITransactionExecutor intrface
+public class DepositTransactionExecutor : ITransactionExecutor{
+    public void ExecuteTransaction(IAccount account, decimal amount){
+        if (account == null){
             throw new ArgumentNullException(nameof(account));
         }
 
@@ -420,41 +431,37 @@ public class DepositTransactionExecutor : ITransactionExecutor
     }
 }
 
-// WithdrawalTransactionExecutor class implementing the ITransactionExecutor interface
-public class WithdrawalTransactionExecutor : ITransactionExecutor
-{
-    public void ExecuteTransaction(IAccount account, decimal amount)
-    {
-        if (account == null)
-        {
+
+// withdrawalTransactionExecutor class impleenting the ITransactionExecutor interface
+public class WithdrawalTransactionExecutor : ITransactionExecutor{
+    public void ExecuteTransaction(IAccount account, decimal amount){
+        if(account == null){
             throw new ArgumentNullException(nameof(account));
         }
 
-        if (account.Balance >= amount)
-        {
+        if(account.Balance >= amount){
             account.Balance -= amount;
             Console.WriteLine($"Withdrawn ${amount} from account {account.AccountNumber}. New balance: ${account.Balance}");
         }
-        else
-        {
+        else{
             Console.WriteLine($"Insufficient funds in account {account.AccountNumber} to withdraw ${amount}.");
         }
     }
 }
 
-// IReportGenerator interface representing the common operations for generating reports
-public interface IReportGenerator
-{
+
+
+// IReportGenerator interface representing the common operations fr generating reports
+public interface IReportGenerator{
     void GenerateReport(IAccount account);
 }
 
-// AccountReportGenerator class implementing the IReportGenerator interface
-public class AccountReportGenerator : IReportGenerator
-{
-    public void GenerateReport(IAccount account)
-    {
-        if (account == null)
-        {
+
+
+// AccountReportGenerator class implements the IReportGenerator interface
+public class AccountReportGenerator : IReportGenerator{
+    public void GenerateReport(IAccount account){
+        if (account == null){
             throw new ArgumentNullException(nameof(account));
         }
 
@@ -464,26 +471,430 @@ public class AccountReportGenerator : IReportGenerator
     }
 }
 
-class Program
-{
-    static void Main()
-    {
-        // Create a bank account
-        // Create a savings account (a more specialized type of bank account)
-        IAccount savingsAccount = new SavingsAccount(56789, "Ishaan", 2000, 0.05m);
 
 
-        // Inject dependencies through interfaces
-        ITransactionExecutor depositExecutor = new DepositTransactionExecutor();
-        ITransactionExecutor withdrawalExecutor = new WithdrawalTransactionExecutor();
-        IReportGenerator reportGenerator = new AccountReportGenerator();
 
-        // Perform transactions using the injected dependencies
-        depositExecutor.ExecuteTransaction(savingsAccount, 500);
-        withdrawalExecutor.ExecuteTransaction(savingsAccount, 200);
 
-        // Generate a report using the injected dependency
-        reportGenerator.GenerateReport(savingsAccount);
+public class RuralAccountReportGenerator : AccountReportGenerator{
+    public void GenerateReport(RuralAccount account){
+        if (account == null){
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        GenerateReport(account);
+        Console.WriteLine($"OpeningCredit: ${account.OpeningCredit}");
+    }
+}
+
+
+
+
+
+
+// use the predefined classes to handle logic for transaction on RuralAccount
+public class RuralAccountTransactionService{
+
+    private DepositTransactionExecutor depositExecutor;
+    private WithdrawalTransactionExecutor withdrawalExecutor;
+
+    // constructor
+    public RuralAccountTransactionService(DepositTransactionExecutor DepositExecutor, WithdrawalTransactionExecutor WithdrawalExecutor){
+        depositExecutor = DepositExecutor;
+        withdrawalExecutor = WithdrawalExecutor;
+    }
+
+
+    // function to deposit into a rural acc
+    public void Deposit(RuralAccount ruralAccount, decimal amount){
+        depositExecutor.ExecuteTransaction(ruralAccount, amount);
+        // add some extra feature here: for now, add opening credit to acc balance
+        ruralAccount.Balance += ruralAccount.OpeningCredit;
+    }
+
+
+    public void Withdraw(RuralAccount ruralAccount, decimal amount){
+        if(ruralAccount.Balance> 0){
+            withdrawalExecutor.ExecuteTransaction(ruralAccount, amount);
+        }
+    }
+}
+
+
+
+
+public class RuralAccount: IAccount{
+    public int AccountNumber { get; set; }
+    public string AccountHolder { get; set; }
+    public decimal Balance { get; set; }
+    public int OpeningCredit { get; set; }
+
+    public RuralAccount(int accountNumber, string accountHolder, decimal balance, int openingCredit){
+        AccountNumber = accountNumber;
+        AccountHolder = accountHolder;
+        Balance = balance;
+        OpeningCredit = openingCredit;
+        Balance += openingCredit;
+    }
+
+}
+
+
+
+public class GovtScheme{
+
+    public List<RuralAccount> ruralAccounts;
+    public event Action<RuralAccount, decimal> DepositEvent;
+
+    public GovtScheme(){
+        DepositEvent = null;
+        ruralAccounts = new List<RuralAccount>();
+    }
+
+    public void DepositInAll(decimal amount){
+        foreach(RuralAccount ra in ruralAccounts){
+            ra.Balance += amount;
+
+            // trigger the event for each account
+            DepositEvent.Invoke(ra, amount);
+            Console.WriteLine($"inserted {amount} into {ra.AccountNumber}");
+        }
+    }
+}
+
+
+
+
+
+class Program{
+    static void Main(){
+
+        // create a savings account (a more specialized type of bank account)
+        RuralAccount ra1 = new RuralAccount(0001, "Ishaan1", 2000, 10000);
+        RuralAccount ra2 = new RuralAccount(0002, "Ishaan2", 4000, 10000);
+
+        DepositTransactionExecutor depositExecutor = new DepositTransactionExecutor();
+        WithdrawalTransactionExecutor withdrawalExecutor = new WithdrawalTransactionExecutor();
+        RuralAccountTransactionService ruralTransactionExecutor = new RuralAccountTransactionService(depositExecutor, withdrawalExecutor);
+        RuralAccountReportGenerator reportGenerator = new RuralAccountReportGenerator();
+        GovtScheme govtScheme = new GovtScheme();
+        govtScheme.DepositEvent += ruralTransactionExecutor.Deposit;
+
+        govtScheme.ruralAccounts.Add(ra1);
+        govtScheme.ruralAccounts.Add(ra2);
+
+
+        // perform transactions using the injected dependencies
+        ruralTransactionExecutor.Deposit(ra1, 500);
+        ruralTransactionExecutor.Withdraw(ra1, 200);
+
+        govtScheme.DepositInAll(100000);
+        // generate a report using the injected dependency
+        reportGenerator.GenerateReport(ra1);
+        reportGenerator.GenerateReport(ra2);
+    }
+}
+
+}
+
+
+
+*/
+
+
+
+
+
+
+// IAccount interface representing the common operations for bank accounts
+public interface IAccount{
+    int AccountNumber { get; set;}
+    string AccountHolder { get; set; }
+    decimal Balance { get; set; }
+}
+
+
+
+// BankAccount class implementing the IAccount interface
+public class BankAccount : IAccount{
+    public int AccountNumber { get; set;}
+    public string AccountHolder { get; set; }
+    public decimal Balance { get; set; }
+
+
+    public BankAccount(int accountNumber, string accountHolder, decimal balance){
+        AccountNumber = accountNumber;
+        AccountHolder = accountHolder;
+        Balance = balance;
+    }
+     
+}
+
+
+
+// SavingsAccount class, a more specialized type of BankAccount which has extra property of InterestRate
+public class SavingsAccount: BankAccount{
+    public decimal InterestRate { get; set;}
+
+    public SavingsAccount(int accountNumber, string accountHolder, decimal balance, decimal interestRate): base(accountNumber, accountHolder, balance){
+        InterestRate = interestRate;
+    }
+}
+
+
+
+
+// ITransactionExecutor interface representing the common operations for executing transactions
+public interface ITransactionExecutor{
+    void ExecuteTransaction(IAccount account, decimal amount);
+}
+
+
+
+
+public class DepositTransactionExecutor : ITransactionExecutor{
+    public void ExecuteTransaction(IAccount account, decimal amount){
+        if (account == null){
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        account.Balance += amount;
+        Console.WriteLine($"Deposited ${amount} into account {account.AccountNumber}. New balance: ${account.Balance}");
+        
+        if(account is RuralAccount){
+
+        }
+    }
+}
+
+
+
+public class WithdrawalTransactionExecutor : ITransactionExecutor{
+    public void ExecuteTransaction(IAccount account, decimal amount){
+        if(account == null){
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        if(account.Balance >= amount){
+            account.Balance -= amount;
+            Console.WriteLine($"Withdrawn ${amount} from account {account.AccountNumber}. New balance: ${account.Balance}");
+        }
+        else{
+            Console.WriteLine($"Insufficient funds in account {account.AccountNumber} to withdraw ${amount}.");
+        }
+    }
+}
+
+
+
+// IReportGenerator interface representing the common operations fr generating reports
+public interface IReportGenerator{
+    void GenerateReport(IAccount account);
+}
+
+
+
+// AccountReportGenerator class implements the IReportGenerator interface
+public class AccountReportGenerator : IReportGenerator{
+    public void GenerateReport(IAccount account){
+        if (account == null){
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        Console.WriteLine($"Account Number: {account.AccountNumber}");
+        Console.WriteLine($"Account Holder: {account.AccountHolder}");
+        Console.WriteLine($"Balance: ${account.Balance}");
+    }
+}
+
+
+
+
+// to generate reports for rural accounts
+public class RuralAccountReportGenerator : AccountReportGenerator{
+    public void GenerateReport(RuralAccount account){
+        if(account == null){
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        GenerateReport(account);
+        Console.WriteLine($"OpeningCredit: ${account.OpeningCredit}");
+    }
+}
+
+
+
+
+
+
+// use the predefined classes to handle logic for transaction on RuralAccount
+public class RuralAccountTransactionService{
+
+    private DepositTransactionExecutor depositExecutor;
+    private WithdrawalTransactionExecutor withdrawalExecutor;
+
+    // constructor
+    public RuralAccountTransactionService(DepositTransactionExecutor DepositExecutor, WithdrawalTransactionExecutor WithdrawalExecutor){
+        depositExecutor = DepositExecutor;
+        withdrawalExecutor = WithdrawalExecutor;
+    }
+
+
+    // function to deposit into a rural acc
+    public void Deposit(RuralAccount ruralAccount, decimal amount){
+        depositExecutor.ExecuteTransaction(ruralAccount, amount);
+        // add some extra feature here: for now, add opening credit to acc balance
+        ruralAccount.Balance += ruralAccount.OpeningCredit;
+    }
+
+
+    public void Withdraw(RuralAccount ruralAccount, decimal amount){
+        if(ruralAccount.Balance> 0){
+            withdrawalExecutor.ExecuteTransaction(ruralAccount, amount);
+        }
+    }
+}
+
+
+
+
+public class RuralAccount: IAccount{
+    public int AccountNumber { get; set; }
+    public string AccountHolder { get; set; }
+    public decimal Balance { get; set; }
+    public int OpeningCredit { get; set; }
+
+    public RuralAccount(int accountNumber, string accountHolder, decimal balance, int openingCredit, GovtScheme govtScheme){
+        AccountNumber = accountNumber;
+        AccountHolder = accountHolder;
+        Balance = balance;
+        OpeningCredit = openingCredit;
+        Balance += openingCredit;
+        govtScheme.ruralAccounts.Add(this);
+    }
+
+}
+
+
+
+public class GovtScheme{
+
+    public List<RuralAccount> ruralAccounts;
+    public event Action<RuralAccount, decimal> DepositEvent;
+
+    public GovtScheme(){
+        DepositEvent = null;
+        ruralAccounts = new List<RuralAccount>();
+    }
+
+    public void DepositInAll(decimal amount){
+        foreach(RuralAccount ra in ruralAccounts){
+            // trigger the event for each account
+            DepositEvent(ra, amount);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+// transaction management interface
+public interface ITransactionManager{
+    void ExecuteDeposit(IAccount account, decimal amount);
+    void ExecuteWithdrawal(IAccount account, decimal amount);
+}
+
+
+
+// transaction manager class for normal BankAccounts and its sub types
+public class NormalAccountTransactionManager : ITransactionManager{
+    public void ExecuteDeposit(IAccount account, decimal amount){
+        if (account == null){
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        account.Balance += amount;
+        Console.WriteLine($"Deposited ${amount} into account {account.AccountNumber}. New balance: ${account.Balance}");
+    }
+
+    public void ExecuteWithdrawal(IAccount account, decimal amount){
+        if (account == null){
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        if (account.Balance >= amount){
+            account.Balance -= amount;
+            Console.WriteLine($"Withdrawn ${amount} from account {account.AccountNumber}. New balance: ${account.Balance}");
+        }
+        else{
+            Console.WriteLine($"Insufficient funds in account {account.AccountNumber} to withdraw ${amount}.");
+        }
+    }
+}
+
+
+
+// transaction manager for rural bank accounts
+public class RuralAccountTransactionManager : ITransactionManager{
+    public void ExecuteDeposit(IAccount account, decimal amount){
+        if(account == null){
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        // add extra logic here
+        account.Balance += amount;
+        Console.WriteLine($"Deposited ${amount} into rural account {account.AccountNumber}. New balance: ${account.Balance}");
+    }
+
+
+
+    public void ExecuteWithdrawal(IAccount account, decimal amount){
+        if (account == null){
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        // add extra logic here
+        if (account.Balance >= amount){
+            account.Balance -= amount;
+            Console.WriteLine($"Withdrawn ${amount} from rural account {account.AccountNumber}. New balance: ${account.Balance}");
+        }
+        else{
+            Console.WriteLine($"Insufficient funds in rural account {account.AccountNumber} to withdraw ${amount}.");
+        }
+    }
+}
+
+
+
+
+
+class Program{
+    static void Main(){
+
+        // govt scheme event class
+        GovtScheme govtScheme = new GovtScheme();
+
+        // create 2 rural accounts
+        RuralAccount ra1 = new RuralAccount(0001, "Ishaan1", 2000, 10000, govtScheme);
+        RuralAccount ra2 = new RuralAccount(0002, "Ishaan2", 4000, 10000, govtScheme);
+
+        // transaction managers
+        NormalAccountTransactionManager normalTransactionManager = new NormalAccountTransactionManager();
+        RuralAccountTransactionManager ruralTransactionManager = new RuralAccountTransactionManager();
+
+        govtScheme.DepositEvent += ruralTransactionManager.ExecuteDeposit;
+
+        ruralTransactionManager.ExecuteDeposit(ra1, 500);
+        ruralTransactionManager.ExecuteWithdrawal(ra1, 200);
+
+        govtScheme.DepositInAll(100000);
+
+        RuralAccountReportGenerator reportGenerator = new RuralAccountReportGenerator();
+        reportGenerator.GenerateReport(ra1);
+        reportGenerator.GenerateReport(ra2);
     }
 }
 
